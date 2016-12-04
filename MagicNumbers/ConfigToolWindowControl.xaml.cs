@@ -1,12 +1,7 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="ConfigToolWindowControl.xaml.cs" company="Company">
-//     Copyright (c) Company.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
-
-namespace MagicNumbers
+﻿namespace MagicNumbers
 {
-    using System.Diagnostics.CodeAnalysis;
+    using System.Collections.ObjectModel;
+    using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
 
@@ -15,26 +10,43 @@ namespace MagicNumbers
     /// </summary>
     public partial class ConfigToolWindowControl : UserControl
     {
+        ObservableCollection<ConfigItem> Items = new ObservableCollection<ConfigItem>();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigToolWindowControl"/> class.
         /// </summary>
         public ConfigToolWindowControl()
         {
             this.InitializeComponent();
+            Items.Add(new ConfigItem { FilePattern = "Test.txt", IsRegex = true });
+            Items.Add(new ConfigItem { FilePattern = "Test2.txt", IsRegex = false });
+            Items.Add(new ConfigItem { FilePattern = "Test3.txt", IsRegex = false });
+            Items.Add(new ConfigItem { FilePattern = "Test4.txt", IsRegex = true });
+            AllConfigs.ItemsSource = Items;
+            AllConfigs.SelectedItem = Items[0];
         }
 
-        /// <summary>
-        /// Handles click on the button by displaying a message box.
-        /// </summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event args.</param>
-        //[SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions", Justification = "Sample code")]
-        //[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:ElementMustBeginWithUpperCaseLetter", Justification = "Default event handler naming pattern")]
-        //private void button1_Click(object sender, RoutedEventArgs e)
-        //{
-        //    MessageBox.Show(
-        //        string.Format(System.Globalization.CultureInfo.CurrentUICulture, "Invoked '{0}'", this.ToString()),
-        //        "ConfigToolWindow");
-        //}
+        private void AddButton_Click(object sender, RoutedEventArgs e)
+        {
+            Items.Add(new ConfigItem());
+            AllConfigs.SelectedItem = Items.Last();
+        }
+
+        private void RemoveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (AllConfigs.SelectedIndex != -1)
+            {
+                Items.RemoveAt(AllConfigs.SelectedIndex);
+            }
+        }
+    }
+
+    public class ConfigItem
+    {
+        public string FilePattern { get; set; }
+
+        public bool IsRegex { get; set; }
+
+        public string TooltipDefinitions { get; set; }
     }
 }
