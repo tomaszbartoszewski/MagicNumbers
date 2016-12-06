@@ -3,6 +3,9 @@
     using System;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Shell;
+    using Microsoft.VisualStudio.Shell.Settings;
+    using Microsoft.VisualStudio.Settings;
+    using System.ComponentModel.Composition;
 
     /// <summary>
     /// This class implements the tool window exposed by this package and hosts a user control.
@@ -29,6 +32,9 @@
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on
             // the object returned by the Content property.
             this.Content = new ConfigToolWindowControl();
+
+
+
         }
     }
 }

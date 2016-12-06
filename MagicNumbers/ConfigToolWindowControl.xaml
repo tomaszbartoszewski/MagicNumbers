@@ -6,7 +6,7 @@
              Background="{DynamicResource VsBrush.Window}"
              Foreground="{DynamicResource VsBrush.WindowText}"
              mc:Ignorable="d"
-             d:DesignHeight="560" d:DesignWidth="525"
+             Height="560" Width="525"
              Name="MyToolWindow">
     <Grid>
         <Grid.RowDefinitions>
@@ -49,8 +49,8 @@
                 <ColumnDefinition Width="90"/>
                 <ColumnDefinition Width="90"/>
             </Grid.ColumnDefinitions>
-            <Button Name="SaveAll" Grid.Column="1">OK</Button>
-            <Button Name="Cancel" Grid.Column="2">Cancel</Button>
+            <Button Name="SaveAll" Grid.Column="1" Click="SaveAll_Click">OK</Button>
+            <Button Name="Cancel" Grid.Column="2" Click="Cancel_Click">Cancel</Button>
         </Grid>
     </Grid>
 </UserControl>

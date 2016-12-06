@@ -2,6 +2,8 @@
 using System.ComponentModel.Design;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Shell.Settings;
+using Microsoft.VisualStudio.Settings;
 
 namespace MagicNumbers
 {
@@ -38,6 +40,10 @@ namespace MagicNumbers
             }
 
             this.package = package;
+            if (ServiceProviderForWindow == null)
+            {
+                ServiceProviderForWindow = package;
+            }
 
             OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (commandService != null)
@@ -68,6 +74,9 @@ namespace MagicNumbers
             }
         }
 
+        // TODO: This is a hack to get Settings Store
+        public static IServiceProvider ServiceProviderForWindow { get; private set; }
+
         /// <summary>
         /// Initializes the singleton instance of the command.
         /// </summary>
@@ -90,6 +99,12 @@ namespace MagicNumbers
 
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+        }
+
+        public void CheckSettingsStore()
+        {
+            SettingsManager settingsManager = new ShellSettingsManager(ServiceProvider);
+            WritableSettingsStore userSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
         }
     }
 }
