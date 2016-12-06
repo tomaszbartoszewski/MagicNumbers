@@ -1,35 +1,31 @@
-﻿using Microsoft.VisualStudio.Settings;
-using Microsoft.VisualStudio.Shell.Settings;
+﻿using MagicNumbers.Data;
+using MagicNumbers.ViewModels;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace MagicNumbers
 {
-    /// <summary>
-    /// Interaction logic for ConfigToolWindowControl.
-    /// </summary>
     public partial class ConfigToolWindowControl : UserControl
     {
-        ObservableCollection<ConfigItem> Items = new ObservableCollection<ConfigItem>();
+        private ConfigRepository configRepository;
 
-        private const string SettingsStoreCollectionPath = "Text Editor";
-        private const string SettingsStorePropertyName = "MagicNumbersConfig";
+        ObservableCollection<ConfigItemViewModel> Items = new ObservableCollection<ConfigItemViewModel>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigToolWindowControl"/> class.
-        /// </summary>
         public ConfigToolWindowControl()
         {
+            configRepository = new ConfigRepository();
             this.InitializeComponent();
             InitializeConfigItems();
         }
 
         private void InitializeConfigItems()
         {
-            Items = new ObservableCollection<ConfigItem>(GetCurrentConfigItems());
+            var config = configRepository.GetConfig();
+            var configItems = config.ConfigItems.Select(i => new ConfigItemViewModel(i.FilePattern, i.IsRegex, Map(i.TooltipDefinitions)));
+            Items = new ObservableCollection<ConfigItemViewModel>(configItems);
             AllConfigs.ItemsSource = Items;
             if (Items.Any())
             {
@@ -37,23 +33,9 @@ namespace MagicNumbers
             }
         }
 
-        private ConfigItem[] GetCurrentConfigItems()
-        {
-            WritableSettingsStore userSettingsStore = GetSettingsStore();
-            string configJson;
-            if (userSettingsStore.PropertyExists(SettingsStoreCollectionPath, SettingsStorePropertyName))
-            {
-                configJson = userSettingsStore.GetString(SettingsStoreCollectionPath, SettingsStorePropertyName);
-                var config = JsonSerializationHelper.Deserialize<Config>(configJson);
-                return config.ConfigItems;
-            }
-
-            return new ConfigItem[0];
-        }
-
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
-            Items.Add(new ConfigItem());
+            Items.Add(new ConfigItemViewModel());
             AllConfigs.SelectedItem = Items.Last();
         }
 
@@ -67,20 +49,13 @@ namespace MagicNumbers
 
         private void SaveAll_Click(object sender, RoutedEventArgs e)
         {
-            WritableSettingsStore userSettingsStore = GetSettingsStore();
-            var configItems = AllConfigs.Items.Cast<ConfigItem>().ToArray();
-            Config config = new Config { ConfigItems = configItems };
-            var configJson = JsonSerializationHelper.ToJson(config);
-            userSettingsStore.SetString(SettingsStoreCollectionPath, SettingsStorePropertyName, configJson);
-
+            var configItems = AllConfigs.Items.Cast<ConfigItemViewModel>().ToArray();
+            Config config = new Config
+                {
+                    ConfigItems = configItems.Select(i => new ConfigItem(i.FilePattern, i.IsRegex, Map(i.TooltipDefinitions))).ToArray()
+                };
+            configRepository.Save(config);
             CloseParentWindow();
-        }
-
-        private WritableSettingsStore GetSettingsStore()
-        {
-            SettingsManager settingsManager = new ShellSettingsManager(ConfigCommand.ServiceProviderForWindow);
-            WritableSettingsStore userSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
-            return userSettingsStore;
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -93,25 +68,15 @@ namespace MagicNumbers
             Window parentWindow = Window.GetWindow(this);
             parentWindow.Close();
         }
-    }
 
-    [DataContract]
-    public class ConfigItem
-    {
-        [DataMember(Name = "filePattern")]
-        public string FilePattern { get; set; }
+        private TooltipDefinition[] Map(List<TooltipDefinitionViewModel> tooltipDefinitions)
+        {
+            return tooltipDefinitions.Select(t => new TooltipDefinition(t.Input, t.Description)).ToArray();
+        }
 
-        [DataMember(Name = "isRegex")]
-        public bool IsRegex { get; set; }
-
-        [DataMember(Name = "tooltipDefinitions")]
-        public string TooltipDefinitions { get; set; }
-    }
-
-    [DataContract]
-    public class Config
-    {
-        [DataMember(Name = "configItems")]
-        public ConfigItem[] ConfigItems { get; set; }
+        private List<TooltipDefinitionViewModel> Map(TooltipDefinition[] tooltipDefinitions)
+        {
+            return tooltipDefinitions.Select(t => new TooltipDefinitionViewModel(t.Input, t.Description)).ToList();
+        }
     }
 }

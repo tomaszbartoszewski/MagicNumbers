@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
+using MagicNumbers.Data;
 
 namespace MagicNumbers
 {

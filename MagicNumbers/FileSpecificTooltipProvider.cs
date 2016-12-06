@@ -2,6 +2,7 @@
 using System.Text;
 using System.IO;
 using System.Runtime.Serialization;
+using MagicNumbers.Data;
 
 namespace MagicNumbers
 {
@@ -32,13 +33,13 @@ namespace MagicNumbers
         }
     }
 
-    [DataContract]
-    public class TooltipDefinition
-    {
-        [DataMember(Name = "input")]
-        public string Input { get; set; }
+    //[DataContract]
+    //public class TooltipDefinition
+    //{
+    //    [DataMember(Name = "input")]
+    //    public string Input { get; set; }
 
-        [DataMember(Name = "description")]
-        public string Description { get; set; }
-    }
+    //    [DataMember(Name = "description")]
+    //    public string Description { get; set; }
+    //}
 }
