@@ -1,30 +1,52 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace MagicNumbers.ViewModels
 {
-    public class ConfigItemViewModel
+    public class ConfigItemViewModel : INotifyPropertyChanged
     {
         public ConfigItemViewModel()
         {
-            TooltipDefinitions = new List<TooltipDefinitionViewModel>();
+            TooltipDefinitions = new ObservableCollection<TooltipDefinitionViewModel>();
+            TooltipDefinitions.CollectionChanged += new NotifyCollectionChangedEventHandler(Refresh_Json);
+        }
+
+        private void Refresh_Json(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("TooltipDefinitionsJson");
         }
 
         public ConfigItemViewModel(string filePattern, bool isRegex, List<TooltipDefinitionViewModel> tooltipDefinitions)
         {
             FilePattern = filePattern;
             IsRegex = isRegex;
-            TooltipDefinitions = tooltipDefinitions;
+            TooltipDefinitions = new ObservableCollection<TooltipDefinitionViewModel>(tooltipDefinitions);
+            TooltipDefinitions.CollectionChanged += new NotifyCollectionChangedEventHandler(Refresh_Json);
         }
 
         public string FilePattern { get; set; }
 
         public bool IsRegex { get; set; }
 
-        private List<TooltipDefinitionViewModel> tooltipDefinitions;
+        private ObservableCollection<TooltipDefinitionViewModel> tooltipDefinitions;
         private string tooltipDefinitionsJson;
 
-        public List<TooltipDefinitionViewModel> TooltipDefinitions
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, e);
+        }
+
+        protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
+        {
+            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+        }
+
+        public ObservableCollection<TooltipDefinitionViewModel> TooltipDefinitions
         {
             get
             {
@@ -34,6 +56,8 @@ namespace MagicNumbers.ViewModels
             {
                 tooltipDefinitions = value;
                 tooltipDefinitionsJson = JsonSerializationHelper.ToJson(tooltipDefinitions);
+                OnPropertyChanged();
+                OnPropertyChanged("TooltipDefinitionsJson");
             }
         }
 
@@ -46,7 +70,9 @@ namespace MagicNumbers.ViewModels
             set
             {
                 tooltipDefinitionsJson = value;
-                tooltipDefinitions = JsonSerializationHelper.Deserialize<List<TooltipDefinitionViewModel>>(tooltipDefinitionsJson);
+                tooltipDefinitions = JsonSerializationHelper.Deserialize<ObservableCollection<TooltipDefinitionViewModel>>(tooltipDefinitionsJson);
+                OnPropertyChanged();
+                OnPropertyChanged("TooltipDefinitions");
             }
         }
     }

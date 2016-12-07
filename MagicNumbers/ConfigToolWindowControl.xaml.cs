@@ -69,7 +69,7 @@ namespace MagicNumbers
             parentWindow.Close();
         }
 
-        private TooltipDefinition[] Map(List<TooltipDefinitionViewModel> tooltipDefinitions)
+        private TooltipDefinition[] Map(ObservableCollection<TooltipDefinitionViewModel> tooltipDefinitions)
         {
             return tooltipDefinitions.Select(t => new TooltipDefinition(t.Input, t.Description)).ToArray();
         }
