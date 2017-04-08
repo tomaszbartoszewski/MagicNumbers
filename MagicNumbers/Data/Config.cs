@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace MagicNumbers.Data
 {
@@ -31,6 +32,19 @@ namespace MagicNumbers.Data
 
         [DataMember(Name = "tooltipDefinitions")]
         public TooltipDefinition[] TooltipDefinitions { get; set; }
+
+        public bool IsFileMatchingPattern(string fileFullPath)
+        {
+            if (IsRegex)
+            {
+                Regex rgx = new Regex(FilePattern);
+                return rgx.IsMatch(fileFullPath);
+            }
+            else
+            {
+                return fileFullPath.Contains(FilePattern);
+            }
+        }
     }
 
     [DataContract]
